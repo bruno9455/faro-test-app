@@ -5,7 +5,7 @@
     "title": "Faro Test Yarn — Frontend Observability",
     "timezone": "browser",
     "schemaVersion": 39,
-    "version": 16,
+    "version": 20,
     "refresh": "30s",
     "time": {
       "from": "now-24h",
@@ -386,8 +386,8 @@
       },
       {
         "id": 10,
-        "type": "piechart",
-        "title": "Browser",
+        "type": "table",
+        "title": "Sessões Únicas por Browser e Versão",
         "gridPos": {
           "x": 19,
           "y": 6,
@@ -405,51 +405,40 @@
               "type": "loki",
               "uid": "grafanacloud-logs"
             },
-            "expr": "sum by (browser_name) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | browser_name != \"\" [$__range]))",
+            "expr": "count by (browser_name, browser_version) (max by (session_id, browser_name, browser_version) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | browser_name != \"\" | browser_version != \"\" | session_id != \"\" [$__range])))",
+            "legendFormat": "{{browser_name}} {{browser_version}}",
             "instant": true
           }
         ],
         "options": {
-          "pieType": "pie",
-          "tooltip": {
-            "mode": "multi",
-            "sort": "desc"
-          },
-          "legend": {
-            "displayMode": "table",
-            "placement": "right",
-            "showLegend": true,
-            "values": [
-              "percent",
-              "value"
-            ]
-          }
+          "sortBy": [
+            { "displayName": "Browser", "desc": false },
+            { "displayName": "Versão", "desc": false }
+          ],
+          "footer": { "show": false }
         },
         "transformations": [
           {
             "id": "labelsToFields",
-            "options": {
-              "mode": "labels"
-            }
+            "options": { "mode": "columns" }
           },
           {
             "id": "merge",
             "options": {}
           },
           {
-            "id": "reduce",
-            "options": {
-              "reducers": [
-                "sum"
-              ],
-              "includeTimeField": false
-            }
-          },
-          {
             "id": "organize",
             "options": {
-              "excludeByName": {
-                "Field": true
+              "excludeByName": { "Time": true },
+              "indexByName": {
+                "browser_name": 0,
+                "browser_version": 1,
+                "Value": 2
+              },
+              "renameByName": {
+                "browser_name": "Browser",
+                "browser_version": "Versão",
+                "Value": "Sessões"
               }
             }
           }
