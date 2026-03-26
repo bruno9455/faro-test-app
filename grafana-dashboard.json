@@ -5,7 +5,7 @@
     "title": "Faro Test Yarn — Frontend Observability",
     "timezone": "browser",
     "schemaVersion": 39,
-    "version": 7,
+    "version": 8,
     "refresh": "30s",
     "time": {
       "from": "now-24h",
@@ -20,7 +20,7 @@
       {
         "id": 1,
         "type": "geomap",
-        "title": "🌍 Localização dos Utilizadores",
+        "title": "🌍 Localização dos Utilizadores (por Cidade)",
         "gridPos": {
           "x": 0,
           "y": 0,
@@ -34,10 +34,10 @@
         "targets": [
           {
             "refId": "A",
-            "expr": "sum by (geo_country_iso) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | geo_country_iso != \"\" [$__range]))",
+            "expr": "sum by (geo_city) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | geo_city != \"\" [$__range]))",
             "queryType": "instant",
             "instant": true,
-            "legendFormat": "{{geo_country_iso}}"
+            "legendFormat": "{{geo_city}}"
           }
         ],
         "transformations": [
@@ -55,7 +55,7 @@
             "id": "groupBy",
             "options": {
               "fields": {
-                "geo_country_iso": {
+                "geo_city": {
                   "operation": "groupby"
                 },
                 "Value": {
@@ -91,17 +91,17 @@
           "layers": [
             {
               "type": "markers",
-              "name": "Utilizadores",
+              "name": "Cidades",
               "config": {
                 "style": {
                   "color": {
                     "fixed": "orange"
                   },
-                  "opacity": 0.75,
+                  "opacity": 0.85,
                   "size": {
-                    "fixed": 5,
-                    "max": 30,
-                    "min": 3,
+                    "fixed": 8,
+                    "max": 35,
+                    "min": 5,
                     "field": "Visitas"
                   },
                   "symbol": {
@@ -113,8 +113,8 @@
               },
               "location": {
                 "mode": "lookup",
-                "lookup": "geo_country_iso",
-                "gazetteer": "public/gazetteer/countries.json"
+                "lookup": "geo_city",
+                "gazetteer": "https://bruno9455.github.io/faro-test-app/cities.json"
               }
             }
           ],
@@ -422,7 +422,7 @@
       {
         "id": 11,
         "type": "table",
-        "title": "📍 Utilizadores por Localização (Continente › País › Cidade)",
+        "title": "📍 Sessões Únicas por Localização",
         "gridPos": {
           "x": 0,
           "y": 12,
@@ -436,7 +436,7 @@
         "targets": [
           {
             "refId": "A",
-            "expr": "sum by (geo_continent_iso, geo_country_iso, geo_city) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | geo_city != \"\" [$__range]))",
+            "expr": "sum by (geo_continent_iso, geo_country_iso, geo_city) (count by (geo_continent_iso, geo_country_iso, geo_city, session_id) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | session_id != \"\" | geo_city != \"\" [$__range])))",
             "queryType": "instant",
             "instant": true
           }
@@ -481,7 +481,7 @@
                 "geo_continent_iso": "Continente",
                 "geo_country_iso": "País",
                 "geo_city": "Cidade",
-                "Value (sum)": "Eventos"
+                "Value (sum)": "Sessões"
               }
             }
           },
@@ -498,8 +498,8 @@
                   "displayName": "País"
                 },
                 {
-                  "desc": false,
-                  "displayName": "Cidade"
+                  "desc": true,
+                  "displayName": "Sessões"
                 }
               ]
             }
@@ -508,10 +508,7 @@
         "fieldConfig": {
           "defaults": {
             "custom": {
-              "align": "left",
-              "cellOptions": {
-                "type": "auto"
-              }
+              "align": "left"
             }
           },
           "overrides": [
@@ -523,7 +520,11 @@
               "properties": [
                 {
                   "id": "custom.width",
-                  "value": 160
+                  "value": 170
+                },
+                {
+                  "id": "custom.rowGroupIndex",
+                  "value": 0
                 },
                 {
                   "id": "mappings",
@@ -573,7 +574,11 @@
               "properties": [
                 {
                   "id": "custom.width",
-                  "value": 150
+                  "value": 160
+                },
+                {
+                  "id": "custom.rowGroupIndex",
+                  "value": 1
                 },
                 {
                   "id": "mappings",
@@ -721,25 +726,33 @@
                           "text": "África do Sul",
                           "index": 34
                         },
+                        "SG": {
+                          "text": "Singapura",
+                          "index": 35
+                        },
+                        "AE": {
+                          "text": "Emirados Árabes",
+                          "index": 36
+                        },
                         "NG": {
                           "text": "Nigéria",
-                          "index": 35
+                          "index": 37
                         },
                         "EG": {
                           "text": "Egito",
-                          "index": 36
+                          "index": 38
                         },
                         "MA": {
                           "text": "Marrocos",
-                          "index": 37
+                          "index": 39
                         },
                         "AO": {
                           "text": "Angola",
-                          "index": 38
+                          "index": 40
                         },
                         "MZ": {
                           "text": "Moçambique",
-                          "index": 39
+                          "index": 41
                         }
                       }
                     }
@@ -755,19 +768,19 @@
               "properties": [
                 {
                   "id": "custom.width",
-                  "value": 140
+                  "value": 130
                 }
               ]
             },
             {
               "matcher": {
                 "id": "byName",
-                "options": "Eventos"
+                "options": "Sessões"
               },
               "properties": [
                 {
                   "id": "custom.width",
-                  "value": 90
+                  "value": 80
                 },
                 {
                   "id": "custom.align",
@@ -794,6 +807,10 @@
                       {
                         "color": "blue",
                         "value": null
+                      },
+                      {
+                        "color": "purple",
+                        "value": 5
                       }
                     ]
                   }
@@ -811,7 +828,7 @@
               "sum"
             ],
             "fields": [
-              "Eventos"
+              "Sessões"
             ],
             "countRows": false,
             "enablePagination": false
