@@ -5,7 +5,7 @@
     "title": "Faro Test Yarn — Frontend Observability",
     "timezone": "browser",
     "schemaVersion": 39,
-    "version": 13,
+    "version": 14,
     "refresh": "30s",
     "time": {
       "from": "now-24h",
@@ -517,7 +517,7 @@
         "targets": [
           {
             "refId": "A",
-            "expr": "sum by (geo_continent_iso) (count by (geo_continent_iso, session_id) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | session_id != \"\" | geo_continent_iso != \"\" [$__range])))",
+            "expr": "count by (geo_continent_iso) (max by (session_id, geo_continent_iso) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | session_id != \"\" | geo_continent_iso != \"\" [$__range])))",
             "queryType": "instant",
             "instant": true
           }
@@ -701,7 +701,7 @@
         "targets": [
           {
             "refId": "A",
-            "expr": "sum by (geo_country_iso) (count by (geo_country_iso, session_id) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | session_id != \"\" | geo_country_iso != \"\" [$__range])))",
+            "expr": "count by (geo_country_iso) (max by (session_id, geo_country_iso) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | session_id != \"\" | geo_country_iso != \"\" [$__range])))",
             "queryType": "instant",
             "instant": true
           }
@@ -1025,7 +1025,7 @@
         "targets": [
           {
             "refId": "A",
-            "expr": "sum by (geo_city) (count by (geo_city, session_id) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | session_id != \"\" | geo_city != \"\" [$__range])))",
+            "expr": "count by (geo_city) (max by (session_id, geo_city) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | session_id != \"\" | geo_city != \"\" [$__range])))",
             "queryType": "instant",
             "instant": true
           }
