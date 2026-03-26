@@ -5,7 +5,7 @@
     "title": "Faro Test Yarn — Frontend Observability",
     "timezone": "browser",
     "schemaVersion": 39,
-    "version": 15,
+    "version": 16,
     "refresh": "30s",
     "time": {
       "from": "now-24h",
@@ -406,8 +406,7 @@
               "uid": "grafanacloud-logs"
             },
             "expr": "sum by (browser_name) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | browser_name != \"\" [$__range]))",
-            "instant": true,
-            "legendFormat": "{{browser_name}}"
+            "instant": true
           }
         ],
         "options": {
@@ -426,7 +425,35 @@
             ]
           }
         },
-        "transformations": []
+        "transformations": [
+          {
+            "id": "labelsToFields",
+            "options": {
+              "mode": "labels"
+            }
+          },
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "reduce",
+            "options": {
+              "reducers": [
+                "sum"
+              ],
+              "includeTimeField": false
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Field": true
+              }
+            }
+          }
+        ]
       },
       {
         "id": 6,
