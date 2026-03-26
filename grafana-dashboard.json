@@ -5,7 +5,7 @@
     "title": "Faro Test Yarn — Frontend Observability",
     "timezone": "browser",
     "schemaVersion": 39,
-    "version": 8,
+    "version": 10,
     "refresh": "30s",
     "time": {
       "from": "now-24h",
@@ -523,10 +523,6 @@
                   "value": 170
                 },
                 {
-                  "id": "custom.rowGroupIndex",
-                  "value": 0
-                },
-                {
                   "id": "mappings",
                   "value": [
                     {
@@ -575,10 +571,6 @@
                 {
                   "id": "custom.width",
                   "value": 160
-                },
-                {
-                  "id": "custom.rowGroupIndex",
-                  "value": 1
                 },
                 {
                   "id": "mappings",
@@ -780,7 +772,7 @@
               "properties": [
                 {
                   "id": "custom.width",
-                  "value": 80
+                  "value": 85
                 },
                 {
                   "id": "custom.align",
