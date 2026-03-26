@@ -5,7 +5,7 @@
     "title": "Faro Test Yarn — Frontend Observability",
     "timezone": "browser",
     "schemaVersion": 39,
-    "version": 12,
+    "version": 13,
     "refresh": "30s",
     "time": {
       "from": "now-24h",
@@ -429,13 +429,85 @@
         ]
       },
       {
-        "id": 11,
+        "id": 6,
+        "type": "timeseries",
+        "title": "Atividade por Tipo ao Longo do Tempo",
+        "gridPos": {
+          "x": 10,
+          "y": 12,
+          "w": 14,
+          "h": 6
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "sum by (kind) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt [$__interval]))",
+            "legendFormat": "{{kind}}"
+          }
+        ],
+        "options": {
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          },
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "lineWidth": 2,
+              "fillOpacity": 10
+            }
+          },
+          "overrides": []
+        }
+      },
+      {
+        "id": 8,
+        "type": "logs",
+        "title": "Atividade Recente",
+        "gridPos": {
+          "x": 10,
+          "y": 18,
+          "w": 14,
+          "h": 6
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "{service_name=\"faro-test-yarn\"}",
+            "maxLines": 50
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": false,
+          "wrapLogMessage": false,
+          "sortOrder": "Descending",
+          "enableLogDetails": true,
+          "dedupStrategy": "none"
+        }
+      },
+      {
+        "id": 20,
         "type": "table",
-        "title": "📍 Sessões Únicas por Localização",
+        "title": "Continente",
         "gridPos": {
           "x": 0,
           "y": 12,
-          "w": 10,
+          "w": 3,
           "h": 12
         },
         "datasource": {
@@ -445,11 +517,24 @@
         "targets": [
           {
             "refId": "A",
-            "expr": "sum by (geo_continent_iso, geo_country_iso, geo_city) (count by (geo_continent_iso, geo_country_iso, geo_city, session_id) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | session_id != \"\" | geo_city != \"\" [$__range])))",
+            "expr": "sum by (geo_continent_iso) (count by (geo_continent_iso, session_id) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | session_id != \"\" | geo_continent_iso != \"\" [$__range])))",
             "queryType": "instant",
             "instant": true
           }
         ],
+        "options": {
+          "showHeader": true,
+          "cellHeight": "sm",
+          "footer": {
+            "show": true,
+            "reducer": [
+              "sum"
+            ],
+            "fields": [
+              "Sessões"
+            ]
+          }
+        },
         "transformations": [
           {
             "id": "labelsToFields",
@@ -469,15 +554,11 @@
               },
               "indexByName": {
                 "geo_continent_iso": 0,
-                "geo_country_iso": 1,
-                "geo_city": 2,
-                "Value": 3,
-                "Time": 4
+                "Value": 1,
+                "Time": 2
               },
               "renameByName": {
                 "geo_continent_iso": "Continente",
-                "geo_country_iso": "País",
-                "geo_city": "Cidade",
                 "Value": "Sessões"
               }
             }
@@ -489,14 +570,6 @@
                 {
                   "desc": false,
                   "displayName": "Continente"
-                },
-                {
-                  "desc": false,
-                  "displayName": "País"
-                },
-                {
-                  "desc": false,
-                  "displayName": "Cidade"
                 }
               ]
             }
@@ -517,7 +590,11 @@
               "properties": [
                 {
                   "id": "custom.width",
-                  "value": 170
+                  "value": 140
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
                 },
                 {
                   "id": "mappings",
@@ -562,12 +639,146 @@
             {
               "matcher": {
                 "id": "byName",
+                "options": "Sessões"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 70
+                },
+                {
+                  "id": "custom.align",
+                  "value": "right"
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-background",
+                    "mode": "gradient"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "continuous-BlPu"
+                  }
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "blue",
+                        "value": null
+                      },
+                      {
+                        "color": "purple",
+                        "value": 5
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 21,
+        "type": "table",
+        "title": "País",
+        "gridPos": {
+          "x": 3,
+          "y": 12,
+          "w": 4,
+          "h": 12
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "sum by (geo_country_iso) (count by (geo_country_iso, session_id) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | session_id != \"\" | geo_country_iso != \"\" [$__range])))",
+            "queryType": "instant",
+            "instant": true
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "cellHeight": "sm",
+          "footer": {
+            "show": true,
+            "reducer": [
+              "sum"
+            ],
+            "fields": [
+              "Sessões"
+            ]
+          }
+        },
+        "transformations": [
+          {
+            "id": "labelsToFields",
+            "options": {
+              "mode": "columns"
+            }
+          },
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "indexByName": {
+                "geo_country_iso": 0,
+                "Value": 1,
+                "Time": 2
+              },
+              "renameByName": {
+                "geo_country_iso": "País",
+                "Value": "Sessões"
+              }
+            }
+          },
+          {
+            "id": "sortBy",
+            "options": {
+              "fields": [
+                {
+                  "desc": false,
+                  "displayName": "País"
+                }
+              ]
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left"
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
                 "options": "País"
               },
               "properties": [
                 {
                   "id": "custom.width",
-                  "value": 160
+                  "value": 140
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
                 },
                 {
                   "id": "mappings",
@@ -752,24 +963,12 @@
             {
               "matcher": {
                 "id": "byName",
-                "options": "Cidade"
-              },
-              "properties": [
-                {
-                  "id": "custom.width",
-                  "value": 130
-                }
-              ]
-            },
-            {
-              "matcher": {
-                "id": "byName",
                 "options": "Sessões"
               },
               "properties": [
                 {
                   "id": "custom.width",
-                  "value": 85
+                  "value": 70
                 },
                 {
                   "id": "custom.align",
@@ -807,7 +1006,30 @@
               ]
             }
           ]
+        }
+      },
+      {
+        "id": 22,
+        "type": "table",
+        "title": "Cidade",
+        "gridPos": {
+          "x": 7,
+          "y": 12,
+          "w": 3,
+          "h": 12
         },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "sum by (geo_city) (count by (geo_city, session_id) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | session_id != \"\" | geo_city != \"\" [$__range])))",
+            "queryType": "instant",
+            "instant": true
+          }
+        ],
         "options": {
           "showHeader": true,
           "cellHeight": "sm",
@@ -818,82 +1040,118 @@
             ],
             "fields": [
               "Sessões"
-            ],
-            "countRows": false,
-            "enablePagination": false
+            ]
           }
-        }
-      },
-      {
-        "id": 6,
-        "type": "timeseries",
-        "title": "Atividade por Tipo ao Longo do Tempo",
-        "gridPos": {
-          "x": 10,
-          "y": 12,
-          "w": 14,
-          "h": 6
         },
-        "datasource": {
-          "type": "loki",
-          "uid": "grafanacloud-logs"
-        },
-        "targets": [
+        "transformations": [
           {
-            "refId": "A",
-            "expr": "sum by (kind) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt [$__interval]))",
-            "legendFormat": "{{kind}}"
+            "id": "labelsToFields",
+            "options": {
+              "mode": "columns"
+            }
+          },
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "indexByName": {
+                "geo_city": 0,
+                "Value": 1,
+                "Time": 2
+              },
+              "renameByName": {
+                "geo_city": "Cidade",
+                "Value": "Sessões"
+              }
+            }
+          },
+          {
+            "id": "sortBy",
+            "options": {
+              "fields": [
+                {
+                  "desc": false,
+                  "displayName": "Cidade"
+                }
+              ]
+            }
           }
         ],
-        "options": {
-          "tooltip": {
-            "mode": "multi",
-            "sort": "desc"
-          },
-          "legend": {
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
-          }
-        },
         "fieldConfig": {
           "defaults": {
             "custom": {
-              "lineWidth": 2,
-              "fillOpacity": 10
+              "align": "left"
             }
           },
-          "overrides": []
-        }
-      },
-      {
-        "id": 8,
-        "type": "logs",
-        "title": "Atividade Recente",
-        "gridPos": {
-          "x": 10,
-          "y": 18,
-          "w": 14,
-          "h": 6
-        },
-        "datasource": {
-          "type": "loki",
-          "uid": "grafanacloud-logs"
-        },
-        "targets": [
-          {
-            "refId": "A",
-            "expr": "{service_name=\"faro-test-yarn\"}",
-            "maxLines": 50
-          }
-        ],
-        "options": {
-          "showTime": true,
-          "showLabels": false,
-          "wrapLogMessage": false,
-          "sortOrder": "Descending",
-          "enableLogDetails": true,
-          "dedupStrategy": "none"
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Cidade"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 140
+                },
+                {
+                  "id": "custom.align",
+                  "value": "left"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Sessões"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 70
+                },
+                {
+                  "id": "custom.align",
+                  "value": "right"
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-background",
+                    "mode": "gradient"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "continuous-BlPu"
+                  }
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "blue",
+                        "value": null
+                      },
+                      {
+                        "color": "purple",
+                        "value": 5
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       }
     ]
