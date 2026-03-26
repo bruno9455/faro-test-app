@@ -5,7 +5,7 @@
     "title": "Faro Test Yarn — Frontend Observability",
     "timezone": "browser",
     "schemaVersion": 39,
-    "version": 10,
+    "version": 11,
     "refresh": "30s",
     "time": {
       "from": "now-24h",
@@ -402,8 +402,6 @@
           {
             "refId": "A",
             "expr": "sum by (browser_name) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | browser_name != \"\" [$__range]))",
-            "queryType": "instant",
-            "instant": true,
             "legendFormat": "{{browser_name}}"
           }
         ],
@@ -417,7 +415,18 @@
             "placement": "bottom",
             "showLegend": true
           }
-        }
+        },
+        "transformations": [
+          {
+            "id": "reduce",
+            "options": {
+              "reducers": [
+                "sum"
+              ],
+              "includeTimeField": false
+            }
+          }
+        ]
       },
       {
         "id": 11,
@@ -453,35 +462,23 @@
             "options": {}
           },
           {
-            "id": "groupBy",
-            "options": {
-              "fields": {
-                "geo_continent_iso": {
-                  "operation": "groupby"
-                },
-                "geo_country_iso": {
-                  "operation": "groupby"
-                },
-                "geo_city": {
-                  "operation": "groupby"
-                },
-                "Value": {
-                  "operation": "aggregate",
-                  "aggregations": [
-                    "sum"
-                  ]
-                }
-              }
-            }
-          },
-          {
             "id": "organize",
             "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "indexByName": {
+                "geo_continent_iso": 0,
+                "geo_country_iso": 1,
+                "geo_city": 2,
+                "Value": 3,
+                "Time": 4
+              },
               "renameByName": {
                 "geo_continent_iso": "Continente",
                 "geo_country_iso": "País",
                 "geo_city": "Cidade",
-                "Value (sum)": "Sessões"
+                "Value": "Sessões"
               }
             }
           },
