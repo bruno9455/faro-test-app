@@ -1,0 +1,915 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "faro-test-yarn-obs",
+    "title": "Faro Test Yarn — Frontend Observability",
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "version": 2,
+    "refresh": "30s",
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "tags": [
+      "faro",
+      "frontend",
+      "observability"
+    ],
+    "panels": [
+      {
+        "id": 1,
+        "type": "geomap",
+        "title": "🌍 Localização dos Utilizadores",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 14,
+          "h": 12
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "sum by (geo_country_iso) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | geo_country_iso != \"\" [$__range]))",
+            "queryType": "instant",
+            "instant": true,
+            "legendFormat": "{{geo_country_iso}}"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "labelsToFields",
+            "options": {
+              "mode": "columns"
+            }
+          },
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "groupBy",
+            "options": {
+              "fields": {
+                "geo_country_iso": {
+                  "operation": "groupby"
+                },
+                "Value": {
+                  "operation": "aggregate",
+                  "aggregations": [
+                    "sum"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "renameByName": {
+                "Value (sum)": "Visitas"
+              }
+            }
+          }
+        ],
+        "options": {
+          "view": {
+            "id": "zero",
+            "lat": 30,
+            "lon": 10,
+            "zoom": 1.5
+          },
+          "controls": {
+            "mouseWheelZoom": true,
+            "showZoom": true,
+            "showAttribution": true
+          },
+          "layers": [
+            {
+              "type": "markers",
+              "name": "Utilizadores",
+              "config": {
+                "style": {
+                  "color": {
+                    "fixed": "orange"
+                  },
+                  "opacity": 0.75,
+                  "size": {
+                    "fixed": 5,
+                    "max": 30,
+                    "min": 3,
+                    "field": "Visitas"
+                  },
+                  "symbol": {
+                    "fixed": "img/icons/marker/circle.svg",
+                    "mode": "fixed"
+                  }
+                },
+                "showLegend": true
+              },
+              "location": {
+                "mode": "lookup",
+                "lookup": "geo_country_iso",
+                "gazetteer": "public/gazetteer/countries.json"
+              }
+            }
+          ],
+          "tooltip": {
+            "mode": "details"
+          },
+          "basemap": {
+            "type": "default",
+            "name": "Layer 0"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {},
+          "overrides": []
+        }
+      },
+      {
+        "id": 2,
+        "type": "stat",
+        "title": "Total de Eventos (24h)",
+        "gridPos": {
+          "x": 14,
+          "y": 0,
+          "w": 5,
+          "h": 3
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "count_over_time({service_name=\"faro-test-yarn\"}[$__range])",
+            "queryType": "instant",
+            "instant": true
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "calcs": [
+              "sum"
+            ]
+          },
+          "colorMode": "background",
+          "graphMode": "none"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "orange"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "orange",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": []
+        }
+      },
+      {
+        "id": 3,
+        "type": "stat",
+        "title": "Sessões Únicas (24h)",
+        "gridPos": {
+          "x": 19,
+          "y": 0,
+          "w": 5,
+          "h": 3
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "count(sum by (session_id) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | session_id != \"\" [$__range])))",
+            "queryType": "instant",
+            "instant": true
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "colorMode": "background",
+          "graphMode": "none"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "blue"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "blue",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": []
+        }
+      },
+      {
+        "id": 4,
+        "type": "stat",
+        "title": "Países (24h)",
+        "gridPos": {
+          "x": 14,
+          "y": 3,
+          "w": 5,
+          "h": 3
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "count(sum by (geo_country_iso) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | geo_country_iso != \"\" [$__range])))",
+            "queryType": "instant",
+            "instant": true
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "colorMode": "background",
+          "graphMode": "none"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "green"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": []
+        }
+      },
+      {
+        "id": 5,
+        "type": "stat",
+        "title": "Erros (24h)",
+        "gridPos": {
+          "x": 19,
+          "y": 3,
+          "w": 5,
+          "h": 3
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "count_over_time({service_name=\"faro-test-yarn\", kind=\"exception\"}[$__range])",
+            "queryType": "instant",
+            "instant": true
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "calcs": [
+              "sum"
+            ]
+          },
+          "colorMode": "background",
+          "graphMode": "none"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 1
+                }
+              ]
+            }
+          },
+          "overrides": []
+        }
+      },
+      {
+        "id": 9,
+        "type": "stat",
+        "title": "Cidades (24h)",
+        "gridPos": {
+          "x": 14,
+          "y": 6,
+          "w": 5,
+          "h": 3
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "count(sum by (geo_city) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | geo_city != \"\" [$__range])))",
+            "queryType": "instant",
+            "instant": true
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ]
+          },
+          "colorMode": "background",
+          "graphMode": "none"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "purple"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "purple",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": []
+        }
+      },
+      {
+        "id": 10,
+        "type": "piechart",
+        "title": "Browser",
+        "gridPos": {
+          "x": 19,
+          "y": 6,
+          "w": 5,
+          "h": 6
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "sum by (browser_name) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | browser_name != \"\" [$__range]))",
+            "queryType": "instant",
+            "instant": true,
+            "legendFormat": "{{browser_name}}"
+          }
+        ],
+        "options": {
+          "pieType": "pie",
+          "tooltip": {
+            "mode": "single"
+          },
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          }
+        }
+      },
+      {
+        "id": 11,
+        "type": "table",
+        "title": "📍 Utilizadores por Localização (Continente › País › Cidade)",
+        "gridPos": {
+          "x": 0,
+          "y": 12,
+          "w": 10,
+          "h": 12
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "sum by (geo_continent_iso, geo_country_iso, geo_city) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt | geo_city != \"\" [$__range]))",
+            "queryType": "instant",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "labelsToFields",
+            "options": {
+              "mode": "columns"
+            }
+          },
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "groupBy",
+            "options": {
+              "fields": {
+                "geo_continent_iso": {
+                  "operation": "groupby"
+                },
+                "geo_country_iso": {
+                  "operation": "groupby"
+                },
+                "geo_city": {
+                  "operation": "groupby"
+                },
+                "Value": {
+                  "operation": "aggregate",
+                  "aggregations": [
+                    "sum"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": "organize",
+            "options": {
+              "renameByName": {
+                "geo_continent_iso": "Continente",
+                "geo_country_iso": "País",
+                "geo_city": "Cidade",
+                "Value (sum)": "Eventos"
+              }
+            }
+          },
+          {
+            "id": "sortBy",
+            "options": {
+              "fields": [
+                {
+                  "desc": false,
+                  "displayName": "Continente"
+                },
+                {
+                  "desc": false,
+                  "displayName": "País"
+                },
+                {
+                  "desc": false,
+                  "displayName": "Cidade"
+                }
+              ]
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "left",
+              "cellOptions": {
+                "type": "auto"
+              }
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Continente"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 160
+                },
+                {
+                  "id": "custom.rowGroup",
+                  "value": {
+                    "enable": true
+                  }
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "type": "value",
+                      "options": {
+                        "AF": {
+                          "text": "África",
+                          "index": 0
+                        },
+                        "AN": {
+                          "text": "Antártida",
+                          "index": 1
+                        },
+                        "AS": {
+                          "text": "Ásia",
+                          "index": 2
+                        },
+                        "EU": {
+                          "text": "Europa",
+                          "index": 3
+                        },
+                        "NA": {
+                          "text": "América do Norte",
+                          "index": 4
+                        },
+                        "OC": {
+                          "text": "Oceania",
+                          "index": 5
+                        },
+                        "SA": {
+                          "text": "América do Sul",
+                          "index": 6
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "País"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 150
+                },
+                {
+                  "id": "custom.rowGroup",
+                  "value": {
+                    "enable": true
+                  }
+                },
+                {
+                  "id": "mappings",
+                  "value": [
+                    {
+                      "type": "value",
+                      "options": {
+                        "PT": {
+                          "text": "Portugal",
+                          "index": 0
+                        },
+                        "ES": {
+                          "text": "Espanha",
+                          "index": 1
+                        },
+                        "FR": {
+                          "text": "França",
+                          "index": 2
+                        },
+                        "DE": {
+                          "text": "Alemanha",
+                          "index": 3
+                        },
+                        "GB": {
+                          "text": "Reino Unido",
+                          "index": 4
+                        },
+                        "IT": {
+                          "text": "Itália",
+                          "index": 5
+                        },
+                        "NL": {
+                          "text": "Países Baixos",
+                          "index": 6
+                        },
+                        "BE": {
+                          "text": "Bélgica",
+                          "index": 7
+                        },
+                        "CH": {
+                          "text": "Suíça",
+                          "index": 8
+                        },
+                        "AT": {
+                          "text": "Áustria",
+                          "index": 9
+                        },
+                        "PL": {
+                          "text": "Polónia",
+                          "index": 10
+                        },
+                        "SE": {
+                          "text": "Suécia",
+                          "index": 11
+                        },
+                        "NO": {
+                          "text": "Noruega",
+                          "index": 12
+                        },
+                        "DK": {
+                          "text": "Dinamarca",
+                          "index": 13
+                        },
+                        "FI": {
+                          "text": "Finlândia",
+                          "index": 14
+                        },
+                        "IE": {
+                          "text": "Irlanda",
+                          "index": 15
+                        },
+                        "CZ": {
+                          "text": "República Checa",
+                          "index": 16
+                        },
+                        "HU": {
+                          "text": "Hungria",
+                          "index": 17
+                        },
+                        "RO": {
+                          "text": "Roménia",
+                          "index": 18
+                        },
+                        "GR": {
+                          "text": "Grécia",
+                          "index": 19
+                        },
+                        "US": {
+                          "text": "Estados Unidos",
+                          "index": 20
+                        },
+                        "CA": {
+                          "text": "Canadá",
+                          "index": 21
+                        },
+                        "MX": {
+                          "text": "México",
+                          "index": 22
+                        },
+                        "BR": {
+                          "text": "Brasil",
+                          "index": 23
+                        },
+                        "AR": {
+                          "text": "Argentina",
+                          "index": 24
+                        },
+                        "CL": {
+                          "text": "Chile",
+                          "index": 25
+                        },
+                        "CO": {
+                          "text": "Colômbia",
+                          "index": 26
+                        },
+                        "JP": {
+                          "text": "Japão",
+                          "index": 27
+                        },
+                        "CN": {
+                          "text": "China",
+                          "index": 28
+                        },
+                        "IN": {
+                          "text": "Índia",
+                          "index": 29
+                        },
+                        "KR": {
+                          "text": "Coreia do Sul",
+                          "index": 30
+                        },
+                        "AU": {
+                          "text": "Austrália",
+                          "index": 31
+                        },
+                        "NZ": {
+                          "text": "Nova Zelândia",
+                          "index": 32
+                        },
+                        "RU": {
+                          "text": "Rússia",
+                          "index": 33
+                        },
+                        "ZA": {
+                          "text": "África do Sul",
+                          "index": 34
+                        },
+                        "NG": {
+                          "text": "Nigéria",
+                          "index": 35
+                        },
+                        "EG": {
+                          "text": "Egito",
+                          "index": 36
+                        },
+                        "MA": {
+                          "text": "Marrocos",
+                          "index": 37
+                        },
+                        "AO": {
+                          "text": "Angola",
+                          "index": 38
+                        },
+                        "MZ": {
+                          "text": "Moçambique",
+                          "index": 39
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Cidade"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 140
+                },
+                {
+                  "id": "custom.rowGroup",
+                  "value": {
+                    "enable": true
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Eventos"
+              },
+              "properties": [
+                {
+                  "id": "custom.width",
+                  "value": 90
+                },
+                {
+                  "id": "custom.align",
+                  "value": "right"
+                },
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "color-background",
+                    "mode": "gradient"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "continuous-BlPu"
+                  }
+                },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "blue",
+                        "value": null
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "cellHeight": "sm",
+          "footer": {
+            "show": true,
+            "reducer": [
+              "sum"
+            ],
+            "fields": [
+              "Eventos"
+            ],
+            "countRows": false,
+            "enablePagination": false
+          }
+        }
+      },
+      {
+        "id": 6,
+        "type": "timeseries",
+        "title": "Atividade por Tipo ao Longo do Tempo",
+        "gridPos": {
+          "x": 10,
+          "y": 12,
+          "w": 14,
+          "h": 6
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "sum by (kind) (count_over_time({service_name=\"faro-test-yarn\"} | logfmt [$__interval]))",
+            "legendFormat": "{{kind}}"
+          }
+        ],
+        "options": {
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          },
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "lineWidth": 2,
+              "fillOpacity": 10
+            }
+          },
+          "overrides": []
+        }
+      },
+      {
+        "id": 8,
+        "type": "logs",
+        "title": "Atividade Recente",
+        "gridPos": {
+          "x": 10,
+          "y": 18,
+          "w": 14,
+          "h": 6
+        },
+        "datasource": {
+          "type": "loki",
+          "uid": "grafanacloud-logs"
+        },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "{service_name=\"faro-test-yarn\"}",
+            "maxLines": 50
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": false,
+          "wrapLogMessage": false,
+          "sortOrder": "Descending",
+          "enableLogDetails": true,
+          "dedupStrategy": "none"
+        }
+      }
+    ]
+  },
+  "folderId": 0,
+  "overwrite": true
+}
